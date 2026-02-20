@@ -5,7 +5,7 @@
 <div align="center">
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
-![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=for-the-badge&logo=prisma)
+![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=for-the-badge&logo=prisma)
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-010101?style=for-the-badge&logo=socket.io)
@@ -70,9 +70,18 @@ cp .env.example .env
 Edit `.env`:
 
 ```env
-DATABASE_URL="mysql://root:password@localhost:3306/woodledger"
+# Ensure connection strings for Mariadb adapter are format compatible. 
+# You can keep mysql://, but the framework replaces it with mariadb:// for the Prisma 7 driver adapter internally.
+DATABASE_URL="mysql://root:@localhost:3306/woodledger"
 NEXTAUTH_SECRET="your-secret-here"
 NEXTAUTH_URL="http://localhost:3000"
+```
+
+### 3. Prisma 7 Configuration
+In Prisma 7, `prisma.config.ts` controls migrations, generating the client, and connection strings.
+```bash
+# Generate the Prisma client via the new v7 generator pattern outputting to src/generated/
+npx prisma generate
 ```
 
 ### 3. Set Up Database
@@ -135,6 +144,9 @@ src/
     ├── schema.prisma          # Full data model
     ├── seed.ts                # Initial + sample data
     └── migrations/            # Migration history
+
+### Configuration Files
+- `prisma.config.ts` — Required for Prisma ORM v7 client generation, pointing the database adapter to the `.env` connection string.
 ```
 
 ---

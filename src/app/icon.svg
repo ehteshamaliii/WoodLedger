@@ -1,0 +1,48 @@
+<svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+>
+    <defs>
+        <linearGradient id="logo-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFF" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#FFF" stopOpacity="0" />
+        </linearGradient>
+        <filter id="logo-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+    </defs>
+
+    <path
+        d="M25 35L38 75H50L37 35H25Z"
+        fill="#F4D06F"
+        filter="url(#logo-glow)"
+    />
+    <path
+        d="M38 75L45 55H57L50 75H38Z"
+        fill="#F4D06F"
+        fillOpacity="0.8"
+    />
+    <path
+        d="M45 55L52 35H64L57 55H45Z"
+        fill="#F4D06F"
+        fillOpacity="0.6"
+    />
+    <path
+        d="M52 35L65 75H77L64 35H52Z"
+        fill="#F4D06F"
+        filter="url(#logo-glow)"
+    />
+
+    <path
+        d="M25 35L38 75H45L32 35H25Z"
+        fill="url(#logo-gradient-2)"
+    />
+    <path
+        d="M52 35L65 75H72L59 35H52Z"
+        fill="url(#logo-gradient-2)"
+    />
+</svg>

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const prisma = new PrismaClient();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: NextRequest) {
@@ -48,12 +46,12 @@ export async function POST(req: NextRequest) {
 
             // Build the content parts for the image generation request
             const contentParts: any[] = [];
-            
+
             // If we have a reference image, include it for image-to-image generation
             if (referenceImage) {
                 const base64Data = referenceImage.split(",")[1];
                 const mimeType = referenceImage.split(";")[0].split(":")[1];
-                
+
                 contentParts.push({
                     inlineData: {
                         data: base64Data,
@@ -61,7 +59,7 @@ export async function POST(req: NextRequest) {
                     }
                 });
             }
-            
+
             // Add the text prompt
             contentParts.push({
                 text: `Create a high-quality, professional product photograph: ${improvedPrompt}`
@@ -70,7 +68,7 @@ export async function POST(req: NextRequest) {
             // Generate the image
             const result = await imageModel.generateContent(contentParts);
             const response = await result.response;
-            
+
             // Extract the generated image from the response
             if (response.candidates && response.candidates.length > 0) {
                 const candidate = response.candidates[0];
@@ -92,29 +90,29 @@ export async function POST(req: NextRequest) {
             // Fallback to Pollinations.ai with API key
             try {
                 console.log("Using Pollinations.ai fallback");
-                
+
                 const pollinationsKey = process.env.POLLINATIONS_API_KEY;
-                
+
                 if (!pollinationsKey) {
                     throw new Error("POLLINATIONS_API_KEY not found in environment");
                 }
-                
+
                 // Use Pollinations API with authentication (GET endpoint)
                 const encodedPrompt = encodeURIComponent(improvedPrompt);
                 const pollinationsUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=flux`;
-                
+
                 const pollinationsResponse = await fetch(pollinationsUrl, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${pollinationsKey}`,
                     },
                 });
-                
+
                 if (!pollinationsResponse.ok) {
                     const errorText = await pollinationsResponse.text();
                     throw new Error(`Pollinations API error: ${errorText.substring(0, 200)}`);
                 }
-                
+
                 // The response is the image itself
                 const imageBlob = await pollinationsResponse.blob();
                 const arrayBuffer = await imageBlob.arrayBuffer();
@@ -124,36 +122,36 @@ export async function POST(req: NextRequest) {
 
             } catch (fallbackErr: any) {
                 console.error("Image generation fallback failed:", fallbackErr);
-                return NextResponse.json({ 
-                    success: false, 
-                    error: `Image generation unavailable. Enable Gemini billing at https://console.cloud.google.com/billing for AI-generated images.` 
+                return NextResponse.json({
+                    success: false,
+                    error: `Image generation unavailable. Enable Gemini billing at https://console.cloud.google.com/billing for AI-generated images.`
                 }, { status: 503 });
             }
         }
 
         if (!generatedDataUrl) {
-            return NextResponse.json({ 
-                success: false, 
-                error: "Image generation failed (no image returned by model)" 
+            return NextResponse.json({
+                success: false,
+                error: "Image generation failed (no image returned by model)"
             }, { status: 500 });
         }
 
         // Persist the generated image as a data URL (or you could upload to storage and save the public URL)
         if (entityId) {
             if (entityType === "STOCK") {
-                await prisma.stock.update({ where: { id: entityId }, data: { imageUrl: generatedDataUrl } });
+                await prisma.stockImage.create({ data: { stockId: entityId, base64: generatedDataUrl, isPrimary: true } });
             } else if (entityType === "FABRIC") {
                 await prisma.fabricType.update({ where: { id: entityId }, data: { imageUrl: generatedDataUrl } });
             }
         }
 
-        return NextResponse.json({ 
-            success: true, 
-            data: { 
-                url: generatedDataUrl, 
+        return NextResponse.json({
+            success: true,
+            data: {
+                url: generatedDataUrl,
                 prompt: improvedPrompt,
                 provider: usedFallback ? "pollinations" : "gemini"
-            } 
+            }
         });
 
     } catch (error: any) {

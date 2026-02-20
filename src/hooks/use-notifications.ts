@@ -172,34 +172,53 @@ export const useNotifications = (userId?: string) => {
             );
             setUnreadCount((prev) => Math.max(0, prev - 1));
 
-            await fetch(`/api/notifications/${id}`, {
+            // Optimistic Dexie update so UI reacts instantly
+            await db.notifications.update(id, { status: "READ" });
+
+            const res = await fetch(`/api/notifications/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status: "READ" }),
             });
+
+            // If the server says the notification doesn't exist anymore, clean it up locally
+            if (res.status === 404) {
+                await db.notifications.delete(id);
+                setNotifications((prev) => prev.filter((n) => n.id !== id));
+            }
         } catch (error) {
             console.error("Failed to mark as read");
         }
     };
 
     const markAllAsRead = async () => {
-        const unreadIds = notifications
-            .filter((n) => n.status === "UNREAD")
-            .map((n) => n.id);
+        const activeList = offlineNotifications.length > 0 ? offlineNotifications : notifications;
+        const unreadIds = activeList
+            .filter((n: any) => n.status === "UNREAD")
+            .map((n: any) => n.id);
+
+        if (unreadIds.length === 0) return;
 
         setNotifications((prev) =>
             prev.map((n) => ({ ...n, status: "READ" }))
         );
         setUnreadCount(0);
 
+        // Optimistic Bulk Dexie Update
+        await Promise.all(unreadIds.map(id => db.notifications.update(id, { status: "READ" })));
+
         await Promise.all(
-            unreadIds.map((id) =>
-                fetch(`/api/notifications/${id}`, {
+            unreadIds.map(async (id) => {
+                const res = await fetch(`/api/notifications/${id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ status: "READ" }),
-                })
-            )
+                });
+
+                if (res.status === 404) {
+                    await db.notifications.delete(id);
+                }
+            })
         );
     };
 

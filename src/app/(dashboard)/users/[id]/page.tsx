@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Shield, User, Mail, Clock, CheckCircle2, XCircle, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { PremiumCard } from "@/components/shared/premium-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { DetailItem } from "@/components/shared/detail-item";
@@ -143,9 +144,9 @@ export default function UserDetailsPage() {
                             icon={Shield}
                             label="Role"
                             value={
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                <Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-wider">
                                     {user.role}
-                                </span>
+                                </Badge>
                             }
                         />
                         <DetailItem

@@ -34,6 +34,8 @@ export interface User {
     roleId: string;
     permissions?: string[];
     isActive: boolean;
+    pushNotifications?: boolean;
+    emailNotifications?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -2,13 +2,12 @@
 // MySQL Database for Furniture Business Management
 
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma/client"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 // ============================================
@@ -16,14 +15,16 @@ datasource db {
 // ============================================
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  roleId       String   @map("role_id")
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(cuid())
+  name               String
+  email              String   @unique
+  passwordHash       String   @map("password_hash")
+  roleId             String   @map("role_id")
+  isActive           Boolean  @default(true) @map("is_active")
+  pushNotifications  Boolean  @default(false) @map("push_notifications")
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   // Relations
   role              Role               @relation(fields: [roleId], references: [id])

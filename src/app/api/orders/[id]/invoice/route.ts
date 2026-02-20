@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { renderToStream } from "@react-pdf/renderer";
 import { InvoiceTemplate } from "@/components/reports/invoice-template";
 import React from 'react';
-
-const prisma = new PrismaClient();
 
 export async function GET(
     req: NextRequest,

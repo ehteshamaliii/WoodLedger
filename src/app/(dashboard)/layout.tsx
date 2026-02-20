@@ -245,7 +245,7 @@ export default function DashboardLayout({
                                                         "group h-12 px-3 transition-all duration-300 rounded-sm font-bold",
                                                         isActive
                                                             ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-lg shadow-primary/20 glow-primary hover:bg-sidebar-accent/90"
-                                                            : "text-muted-foreground hover:bg-sidebar-accent/10 hover:text-sidebar-accent-foreground"
+                                                            : "text-muted-foreground hover:bg-sidebar-accent/10 hover:text-sidebar-foreground"
                                                     )}
                                                 >
                                                     <Link href={item.href} className="group-data-[collapsible=icon]:gap-0">
@@ -280,7 +280,7 @@ export default function DashboardLayout({
                                                             "group h-12 px-3 transition-all duration-300 rounded-sm font-bold",
                                                             isActive
                                                                 ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-lg shadow-primary/20 glow-primary hover:bg-sidebar-accent/90"
-                                                                : "text-muted-foreground hover:bg-sidebar-accent/10 hover:text-sidebar-accent-foreground"
+                                                                : "text-muted-foreground hover:bg-sidebar-accent/10 hover:text-sidebar-foreground"
                                                         )}
                                                     >
                                                         <Link href={item.href} className="group-data-[collapsible=icon]:gap-0">

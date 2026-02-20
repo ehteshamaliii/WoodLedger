@@ -20,12 +20,19 @@ export async function PATCH(
         const body = await req.json();
         const { status } = body;
 
-        const notification = await prisma.notification.update({
-            where: { id },
+        const result = await prisma.notification.updateMany({
+            where: {
+                id,
+                userId: user.id
+            },
             data: { status },
         });
 
-        return NextResponse.json({ success: true, data: notification });
+        if (result.count === 0) {
+            return NextResponse.json({ success: false, error: "Notification not found or unauthorized" }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json(
             { success: false, error: "Failed to update notification" },

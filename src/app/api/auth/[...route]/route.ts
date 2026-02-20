@@ -112,7 +112,12 @@ export async function GET(
 // ============================================
 
 async function handleLogin(request: NextRequest) {
-    const body = await request.json();
+    let body;
+    try {
+        body = await request.json();
+    } catch (e) {
+        return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 });
+    }
     const validation = loginSchema.safeParse(body);
 
     if (!validation.success) {
@@ -178,7 +183,12 @@ async function handleLogin(request: NextRequest) {
 // ============================================
 
 async function handleRegister(request: NextRequest) {
-    const body = await request.json();
+    let body;
+    try {
+        body = await request.json();
+    } catch (e) {
+        return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 });
+    }
     const validation = registerSchema.safeParse(body);
 
     if (!validation.success) {

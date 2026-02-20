@@ -42,9 +42,11 @@ export function NotificationCenter({ userId }: { userId?: string }) {
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon-sm" className="relative bg-background border border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border transition-all shadow-xs">
 
-                    <Bell className="h-4 w-4 text-muted-foreground" />
+                    <Bell className="h-4 w-4" />
                     {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary border-2 border-background shadow-sm" />
+                        <span className="absolute -top-1.5 -right-1.5 h-4 w-4 flex items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground border-2 border-background shadow-xs">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
                     )}
                 </Button>
             </PopoverTrigger>
@@ -70,19 +72,6 @@ export function NotificationCenter({ userId }: { userId?: string }) {
                             </Button>
                         )}
                     </div>
-                </div>
-
-                {/* Push Notification Toggle */}
-                <div className="flex items-center justify-between px-4 py-2 bg-muted/30 border-b">
-                    <Label htmlFor="push-mode" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                        Push Notifications
-                    </Label>
-                    <Switch
-                        id="push-mode"
-                        checked={isSubscribed}
-                        onCheckedChange={(checked) => checked ? subscribeToPush() : unsubscribeFromPush()}
-                        className="scale-75"
-                    />
                 </div>
 
                 <ScrollArea className="h-[350px]">
@@ -121,7 +110,7 @@ export function NotificationCenter({ userId }: { userId?: string }) {
                                             <div className="flex items-center justify-between mb-0.5">
                                                 <p className={cn(
                                                     "text-[10px] font-bold uppercase tracking-widest",
-                                                    notification.status === "UNREAD" ? "text-primary" : "text-muted-foreground"
+                                                    notification.status === "UNREAD" ? "text-primary dark:text-primary" : "text-muted-foreground dark:text-muted-foreground"
                                                 )}>
                                                     {notification.type}
                                                 </p>
@@ -129,7 +118,7 @@ export function NotificationCenter({ userId }: { userId?: string }) {
                                                     {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                                                 </span>
                                             </div>
-                                            <h5 className="text-xs font-semibold mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+                                            <h5 className={cn("text-xs font-semibold mb-1 line-clamp-1 transition-colors", notification.status === "UNREAD" ? "text-foreground group-hover:text-primary" : "text-foreground glow-none")}>
                                                 {notification.title}
                                             </h5>
                                             <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
