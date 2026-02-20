@@ -156,6 +156,7 @@ export async function POST(request: NextRequest) {
                 },
                 include: {
                     account: true,
+                    order: { select: { id: true, orderNumber: true } },
                 },
             });
 
@@ -232,6 +233,7 @@ export async function POST(request: NextRequest) {
                 id: result.id,
                 account: result.account,
                 orderId: result.orderId,
+                order: result.order,
                 amount: result.amount.toNumber(),
                 type: result.type,
                 description: result.description,

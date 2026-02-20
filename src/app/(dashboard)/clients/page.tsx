@@ -1,32 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Users, Phone, MapPin, Loader2, Trash2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { Plus, Users, Phone, MapPin, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/hooks/use-toast";
 import { DataTable, Column, FilterConfig, RowAction, BulkAction } from "@/components/shared/data-table";
 import { StatsCard } from "@/components/dashboard/widgets/stats-card";
-import { FormInput } from "@/components/shared/form-input";
-import { Form } from "@/components/ui/form";
-
-const clientSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    phone: z.string().min(1, "Phone is required"),
-    address: z.string().optional(),
-    notes: z.string().optional(),
-});
-
-type ClientFormValues = z.infer<typeof clientSchema>;
 
 interface Client {
     id: string;
@@ -40,12 +21,10 @@ interface Client {
 }
 
 export default function ClientsPage() {
+    const router = useRouter();
     const { toast } = useToast();
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [editingClient, setEditingClient] = useState<Client | null>(null);
-    const [submitting, setSubmitting] = useState(false);
 
     const stats = useMemo(() => ({
         total: clients.length,
@@ -53,11 +32,6 @@ export default function ClientsPage() {
         withoutOrders: clients.filter(c => (c._count?.orders ?? 0) === 0).length,
         totalOrders: clients.reduce((sum, c) => sum + (c._count?.orders ?? 0), 0),
     }), [clients]);
-
-    const form = useForm<ClientFormValues>({
-        resolver: zodResolver(clientSchema),
-        defaultValues: { name: "", phone: "", address: "", notes: "" },
-    });
 
     useEffect(() => {
         fetchClients();
@@ -77,42 +51,6 @@ export default function ClientsPage() {
             toast({ title: "Error", description: "Failed to fetch clients", variant: "destructive" });
         } finally {
             setLoading(false);
-        }
-    };
-
-    const openDialog = (client?: Client) => {
-        setEditingClient(client || null);
-        form.reset({
-            name: client?.name || "",
-            phone: client?.phone || "",
-            address: client?.address || "",
-            notes: client?.notes || "",
-        });
-        setDialogOpen(true);
-    };
-
-    const onSubmit = async (data: ClientFormValues) => {
-        try {
-            setSubmitting(true);
-            const url = editingClient ? `/api/clients/${editingClient.id}` : "/api/clients";
-            const method = editingClient ? "PUT" : "POST";
-            const response = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-            const result = await response.json();
-            if (result.success) {
-                toast({ title: "Success", description: `Client ${editingClient ? "updated" : "created"} successfully` });
-                setDialogOpen(false);
-                fetchClients();
-            } else {
-                toast({ title: "Error", description: result.error || "Failed to save client", variant: "destructive" });
-            }
-        } catch {
-            toast({ title: "Error", description: "Failed to save client", variant: "destructive" });
-        } finally {
-            setSubmitting(false);
         }
     };
 
@@ -169,9 +107,9 @@ export default function ClientsPage() {
             className: "text-center",
             headerClassName: "text-center",
             render: (client) => (
-                <div className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-400 text-[10px] font-bold uppercase tracking-wider border border-violet-500/30">
+                <StatusBadge variant="LINKED" className="bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30">
                     {client._count ? client._count.orders : 0} Orders
-                </div>
+                </StatusBadge>
             ),
         },
     ];
@@ -195,7 +133,7 @@ export default function ClientsPage() {
         {
             type: "edit",
             label: "Edit Client",
-            onClick: (client) => openDialog(client),
+            onClick: (client) => router.push(`/clients/${client.id}/edit`),
         },
         {
             type: "delete",
@@ -205,6 +143,8 @@ export default function ClientsPage() {
                 title: "Delete Client",
                 description: (c) => `Delete ${c.name}? This may affect associated orders.`,
             },
+            disabled: (client) => (client._count?.orders ?? 0) > 0,
+            disabledReason: "Cannot delete client with existing orders.",
         },
     ];
 
@@ -242,7 +182,7 @@ export default function ClientsPage() {
                 description="Manage your customer information and contact details"
                 headerActions={
                     <Button
-                        onClick={() => openDialog()}
+                        onClick={() => router.push("/clients/new")}
                         variant="secondary"
                         className="shadow-lg shadow-secondary/20 hover:scale-105 transition-all"
                     >
@@ -266,50 +206,6 @@ export default function ClientsPage() {
                 emptyDescription="Start by adding your first client"
                 emptyIcon={<Users className="h-16 w-16 text-muted-foreground/20" />}
             />
-
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="max-w-md glass-card border-none border-white/5 pb-8">
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold font-heading uppercase tracking-wide">
-                            {editingClient ? "Edit Client" : "Add New Client"}
-                        </DialogTitle>
-                        <DialogDescription className="text-muted-foreground">
-                            {"Enter the client's contact information below"}
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 pt-4">
-                            <FormInput control={form.control} name="name" label="Full Name *" placeholder="e.g., Ahmad Khan" className="h-11" />
-                            <FormInput control={form.control} name="phone" label="Phone Number *" placeholder="e.g., 0300-1234567" className="h-11 font-mono" />
-                            <FormInput control={form.control} name="address" label="Address" placeholder="e.g., Gulberg, Lahore" className="h-11" />
-                            <FormInput control={form.control} name="notes" label="Additional Notes" placeholder="Any special instructions..." type="textarea" className="min-h-[100px]" />
-
-                            <div className="flex justify-end gap-3 pt-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setDialogOpen(false)}
-                                    className="border-white/10 hover:bg-white/5"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className="min-w-[100px] shadow-lg shadow-primary/20"
-                                >
-                                    {submitting ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        editingClient ? "Update Client" : "Create Client"
-                                    )}
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

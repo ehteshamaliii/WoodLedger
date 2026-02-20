@@ -182,7 +182,7 @@ model FurnitureType {
 model FabricType {
   id          String   @id @default(cuid())
   name        String   @unique
-  imageUrl    String?  @map("image_url") @db.VarChar(500)
+  imageUrl    String?  @map("image_url") @db.LongText
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

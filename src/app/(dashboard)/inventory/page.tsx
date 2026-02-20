@@ -9,9 +9,10 @@ import {
     CreditCard,
     ShoppingCart,
     AlertTriangle,
+    ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { useToast } from "@/hooks/use-toast";
 import { DataTable, Column, FilterConfig, BulkAction, RowAction } from "@/components/shared/data-table";
 import { StatsCard } from "@/components/dashboard/widgets/stats-card";
@@ -61,16 +62,12 @@ export default function InventoryPage() {
                 <div className="flex items-center gap-2">
                     <span className="text-foreground/90 font-bold">{item.productName}</span>
                     {item.isOffline && (
-                        <Badge variant="outline" className="text-[10px] h-4 px-1 opacity-50 border-border">OFFLINE</Badge>
+                        <StatusBadge variant="LINKED" label="OFFLINE" className="opacity-50 border-border/20 backdrop-blur-none" />
                     )}
                     {item.quantity === 0 ? (
-                        <Badge variant="outline" className="text-red-600 dark:text-red-500 border-red-500/30 bg-red-500/10 text-[10px] flex items-center gap-1">
-                            OUT OF STOCK
-                        </Badge>
+                        <StatusBadge variant="CANCELLED" label="OUT OF STOCK" />
                     ) : item.quantity <= item.minQuantity ? (
-                        <Badge variant="outline" className="text-red-600 dark:text-red-500 border-red-500/30 bg-red-500/10 text-[10px]">
-                            LOW STOCK
-                        </Badge>
+                        <StatusBadge variant="LOW_STOCK" />
                     ) : null}
                 </div>
             )
@@ -84,10 +81,32 @@ export default function InventoryPage() {
         },
         {
             header: "Fabric Type",
-            accessorKey: "fabricType.name",
+            accessorKey: "fabricType",
             className: "text-muted-foreground text-sm",
             hideable: true,
-            sortable: true
+            sortable: true,
+            render: (item) => (
+                <div className="flex items-center gap-0">
+                    {item.fabricType?.imageUrl ? (
+                        <div className="relative h-8 w-8 shrink-0 rounded-md overflow-hidden border border-white/10 shadow-sm">
+                            <img
+                                src={item.fabricType.imageUrl}
+                                alt={item.fabricType.name}
+                                className="object-cover w-full h-full"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="h-full w-full bg-muted/20 flex flex-col items-center justify-center border border-dashed border-white/5"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground opacity-30"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>';
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <div className="h-8 w-8 shrink-0 rounded-md bg-muted/20 flex items-center justify-center border border-dashed border-white/5">
+                            <ImageIcon className="h-3 w-3 text-muted-foreground opacity-30" />
+                        </div>
+                    )}
+                    <span className="truncate">{item.fabricType?.name || "-"}</span>
+                </div>
+            )
         },
         {
             header: "Quantity",

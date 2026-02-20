@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { ArrowUpRight, ShoppingCart, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -41,18 +41,9 @@ export function RecentOrdersWidget({ orders }: RecentOrdersWidgetProps) {
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-sm tracking-tight group-hover/item:text-primary transition-colors">#{order.orderNumber}</span>
-                                            <Badge
-                                                variant="outline"
-                                                className={cn(
-                                                    "text-[10px] h-5 px-1.5 rounded-sm uppercase tracking-wider font-bold shadow-none border",
-                                                    order.status === 'DELIVERED' && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-                                                    order.status === 'PENDING' && "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-                                                    order.status === 'PROCESSING' && "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-                                                    order.status === 'CANCELLED' && "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
-                                                )}
-                                            >
-                                                {order.status}
-                                            </Badge>
+                                            <StatusBadge
+                                                variant={order.status}
+                                            />
                                         </div>
                                         <p className="text-xs text-muted-foreground font-medium">{order.client.name}</p>
                                     </div>

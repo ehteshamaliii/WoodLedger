@@ -234,7 +234,7 @@ export default function NewOrderPage() {
     };
 
     return (
-        <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 page-enter">
+        <div className="flex-1 space-y-6 px-4 md:px-8 pt-6 pb-24 page-enter">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button
@@ -253,7 +253,7 @@ export default function NewOrderPage() {
             </div>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form id="new-order-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormSection
                         title="Order Details"
                         description="Basic information for this order"
@@ -430,6 +430,7 @@ export default function NewOrderPage() {
                         onCancel={() => router.back()}
                         submitText="Create Order"
                         submitIcon={<Save className="h-4 w-4" />}
+                        formId="new-order-form"
                     />
                 </form>
             </Form>

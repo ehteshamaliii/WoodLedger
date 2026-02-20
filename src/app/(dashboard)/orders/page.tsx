@@ -2,17 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Plus,
-    Trash2,
-    CreditCard,
-    Clock,
-    ShoppingCart,
-    Package,
-    CheckCircle2,
-    XCircle,
-    Truck,
-} from "lucide-react";
+import { Plus, LayoutGrid, Package, Calendar, Clock, ShoppingCart, CheckCircle2, Factory, Truck, XCircle, Trash2 } from "lucide-react";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -87,13 +78,13 @@ export default function OrdersPage() {
                 const displayText = uniqueNames.length > 0 ? uniqueNames.join(", ") : `${order.itemCount || 0} items`;
 
                 return (
-                    <Badge
-                        variant="outline"
-                        className="bg-muted/30 text-muted-foreground border-border/40 hover:bg-muted/50 font-normal truncate max-w-[180px]"
+                    <StatusBadge
+                        variant="LINKED"
+                        className="truncate max-w-[180px] font-normal lowercase bg-muted/20 text-muted-foreground border-border/20 shadow-none backdrop-blur-none"
                         title={displayText}
                     >
                         {displayText}
-                    </Badge>
+                    </StatusBadge>
                 );
             }
         },

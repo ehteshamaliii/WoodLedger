@@ -192,7 +192,7 @@ export default function StockFormPage() {
         : "0";
 
     return (
-        <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 pb-24 page-enter">
+        <div className="flex-1 space-y-6 px-4 md:px-8 pt-6 pb-24 page-enter">
             {/* Premium Header */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/40 pb-6 mb-8">
                 <div className="flex items-center gap-4">
@@ -217,7 +217,7 @@ export default function StockFormPage() {
             </div>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form id="inventory-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <div className="grid gap-8 lg:grid-cols-3">
                         <div className="lg:col-span-2 space-y-8">
                             {/* Visual Asset Management */}
@@ -363,6 +363,7 @@ export default function StockFormPage() {
                         onCancel={() => router.back()}
                         submitText={isEdit ? "Update Stock" : "Create Product"}
                         submitIcon={<Plus className="h-4 w-4" />}
+                        formId="inventory-form"
                     />
                 </form>
             </Form>

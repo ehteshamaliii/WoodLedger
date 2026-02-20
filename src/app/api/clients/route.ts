@@ -51,6 +51,11 @@ export async function GET(request: NextRequest) {
                 skip: (page - 1) * pageSize,
                 take: pageSize,
                 orderBy: { createdAt: "desc" },
+                include: {
+                    _count: {
+                        select: { orders: true }
+                    }
+                }
             }),
             prisma.client.count({ where }),
         ]);

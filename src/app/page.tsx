@@ -38,7 +38,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-20 lg:py-32">
-        <div className="max-w-4xl mx-auto text-center mb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className=" mx-auto text-center mb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-6 tracking-wider uppercase">
             New V2.0 Available
           </div>

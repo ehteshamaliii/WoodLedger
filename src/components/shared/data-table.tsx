@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import {
     Select,
     SelectContent,
@@ -204,11 +205,8 @@ const formatValue = (value: any, type: ColumnType = 'text', config: any = {}) =>
                 return String(value);
             }
         case 'badge':
-            const badgeSettings = config.badgeConfig?.[String(value)] || { label: String(value), variant: "outline" };
             return (
-                <Badge variant={badgeSettings.variant || "outline"} className={cn("capitalize", badgeSettings.className)}>
-                    {badgeSettings.label}
-                </Badge>
+                <StatusBadge variant={String(value)} />
             );
         default:
             return String(value);

@@ -12,7 +12,12 @@ import {
     User,
     Package,
     ShoppingCart,
+    Moon,
+    Sun,
+    Layout
 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import {
     CommandDialog,
@@ -29,17 +34,24 @@ export function GlobalSearch() {
     const [open, setOpen] = React.useState(false);
     const router = useRouter();
 
+    const { setTheme, resolvedTheme } = useTheme();
+    const { toggleSidebar } = useSidebar();
+
     React.useEffect(() => {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
                 setOpen((open) => !open);
             }
+            if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setTheme(resolvedTheme === "dark" ? "light" : "dark");
+            }
         };
 
         document.addEventListener("keydown", down);
         return () => document.removeEventListener("keydown", down);
-    }, []);
+    }, [resolvedTheme, setTheme]);
 
     const runCommand = React.useCallback((command: () => void) => {
         setOpen(false);
@@ -50,11 +62,11 @@ export function GlobalSearch() {
         <>
             <button
                 onClick={() => setOpen(true)}
-                className="inline-flex items-center rounded-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 border border-muted/50 bg-muted/20 hover:bg-primary/10 hover:border-primary/30 hover:text-primary text-muted-foreground relative w-full justify-start text-sm shadow-sm backdrop-blur-md h-10 px-3 py-2 sm:pr-12 md:w-40 lg:w-64 group"
+                className="inline-flex items-center rounded-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 border border-muted/50 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 hover:text-primary text-muted-foreground relative w-full justify-start text-sm shadow-sm backdrop-blur-md h-12 px-4 py-2 sm:pr-12 md:w-40 lg:w-72 group hover-scale-sm"
             >
-                <Search className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-                <span className="opacity-50 group-hover:opacity-100 transition-opacity">Search...</span>
-                <kbd className="pointer-events-none absolute right-2 top-2 hidden h-6 select-none items-center gap-1 rounded-[2px] border border-muted/50 bg-background/50 px-1.5 font-mono text-[10px] font-bold text-muted-foreground opacity-70 sm:flex shadow-sm group-hover:border-primary/20 group-hover:text-primary/70 transition-colors">
+                <Search className="h-4 w-4 opacity-50 group-hover:opacity-100 group-hover:text-primary transition-all mr-2" />
+                <span className="opacity-50 group-hover:opacity-100 transition-opacity">Search commands...</span>
+                <kbd className="pointer-events-none absolute right-3 top-3 hidden h-6 select-none items-center gap-1 rounded-[2px] border border-primary/20 bg-primary/10 px-2 font-mono text-[10px] font-bold text-primary opacity-70 sm:flex shadow-sm group-hover:opacity-100 transition-all">
                     <span className="text-xs">⌘</span>K
                 </kbd>
             </button>
@@ -74,6 +86,19 @@ export function GlobalSearch() {
                         <CommandItem onSelect={() => runCommand(() => router.push("/payments/new"))}>
                             <CreditCard className=" h-4 w-4" />
                             <span>Record Payment</span>
+                        </CommandItem>
+                    </CommandGroup>
+                    <CommandSeparator />
+                    <CommandGroup heading="Quick Actions">
+                        <CommandItem onSelect={() => runCommand(() => setTheme(resolvedTheme === "dark" ? "light" : "dark"))}>
+                            {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                            <span>Toggle Theme</span>
+                            <CommandShortcut>⌘J</CommandShortcut>
+                        </CommandItem>
+                        <CommandItem onSelect={() => runCommand(() => toggleSidebar())}>
+                            <Layout className="h-4 w-4" />
+                            <span>Toggle Sidebar</span>
+                            <CommandShortcut>⌘B</CommandShortcut>
                         </CommandItem>
                     </CommandGroup>
                     <CommandSeparator />

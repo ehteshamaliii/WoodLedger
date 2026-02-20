@@ -165,15 +165,30 @@ export async function GET() {
             where: { status: { notIn: ["DELIVERED", "CANCELLED"] }, totalPrice: { gt: 0 } },
             orderBy: { createdAt: "asc" },
             take: 5,
-            include: { client: true }
+            include: {
+                client: true,
+                payments: {
+                    select: {
+                        amount: true,
+                        type: true
+                    }
+                }
+            }
         });
-        const pendingInvoices = pendingInvoicesData.map(inv => ({
-            id: inv.id,
-            orderNumber: inv.orderNumber,
-            client: inv.client.name,
-            amount: Number(inv.totalPrice) - Number(inv.advancePayment),
-            date: inv.createdAt
-        }));
+        const pendingInvoices = pendingInvoicesData.map(inv => {
+            const paidSoFar = inv.payments.reduce((acc, p) => {
+                const amt = Number(p.amount);
+                return p.type === 'CREDIT' ? acc + amt : acc - amt;
+            }, 0);
+
+            return {
+                id: inv.id,
+                orderNumber: inv.orderNumber,
+                client: inv.client.name,
+                amount: Math.max(0, Number(inv.totalPrice) - paidSoFar),
+                date: inv.createdAt
+            };
+        });
 
         // 9. Widget Data: Production Efficiency (Avg Delivery Time)
         const deliveredOrders = await prisma.order.findMany({

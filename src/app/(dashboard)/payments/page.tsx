@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, Column, FilterConfig, RowAction, BulkAction } from "@/components/shared/data-table";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { StatsCard } from "@/components/dashboard/widgets/stats-card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -111,13 +112,11 @@ export default function PaymentsPage() {
                         onClick={(e) => { e.stopPropagation(); router.push(`/orders/${payment.orderId}`); }}
                         className="group"
                     >
-                        <Badge
-                            variant="outline"
-                            className="font-bold text-[10px] tracking-wider gap-1.5 bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30 hover:bg-sky-500/20 transition-colors cursor-pointer"
-                        >
-                            <ShoppingCart className="h-3 w-3 shrink-0" />
-                            {payment.order?.orderNumber ?? "Linked"}
-                        </Badge>
+                        <StatusBadge
+                            variant="LINKED"
+                            label={payment.order?.orderNumber ?? "Linked"}
+                            className="cursor-pointer hover:bg-sky-500/20"
+                        />
                     </button>
                 ) : (
                     <span className="text-muted-foreground/30 text-xs font-bold tracking-widest flex items-center gap-1">
@@ -132,21 +131,9 @@ export default function PaymentsPage() {
             accessorKey: "type",
             sortable: true,
             render: (payment) => (
-                <Badge
-                    variant="outline"
-                    className={cn(
-                        "font-bold uppercase tracking-wider text-[10px] px-2",
-                        payment.type === "CREDIT"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-emerald-500/30"
-                            : "bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/30"
-                    )}
-                >
-                    {payment.type === "CREDIT" ? (
-                        <span className="flex items-center gap-1"><ArrowUpRight className="h-3 w-3" /> Credit</span>
-                    ) : (
-                        <span className="flex items-center gap-1"><ArrowDownLeft className="h-3 w-3" /> Debit</span>
-                    )}
-                </Badge>
+                <StatusBadge
+                    variant={payment.type}
+                />
             )
         },
         {

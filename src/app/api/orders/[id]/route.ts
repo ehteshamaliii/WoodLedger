@@ -51,6 +51,18 @@ export async function GET(
                         fabricTypes: true,
                     },
                 },
+                payments: {
+                    include: {
+                        account: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        date: 'desc'
+                    }
+                }
             },
         });
 
@@ -59,11 +71,7 @@ export async function GET(
         }
 
         // Aggregate total payments (Net: CREDIT - DEBIT) for this order
-        const payments = await prisma.payment.findMany({
-            where: { orderId: order.id },
-            select: { amount: true, type: true }
-        });
-        const paidSoFar = payments.reduce((acc, p) => {
+        const paidSoFar = order.payments.reduce((acc, p) => {
             const amt = p.amount.toNumber();
             return p.type === 'CREDIT' ? acc + amt : acc - amt;
         }, 0);
@@ -91,6 +99,14 @@ export async function GET(
                     quantity: item.quantity,
                     price: item.price.toNumber(),
                     notes: item.notes,
+                })),
+                payments: order.payments.map(p => ({
+                    id: p.id,
+                    amount: p.amount.toNumber(),
+                    type: p.type,
+                    date: p.date,
+                    description: p.description,
+                    accountName: p.account.name
                 })),
                 createdAt: order.createdAt,
                 updatedAt: order.updatedAt,

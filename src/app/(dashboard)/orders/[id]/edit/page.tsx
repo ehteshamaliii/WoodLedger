@@ -47,6 +47,19 @@ const orderSchema = z.object({
 
 type OrderForm = z.infer<typeof orderSchema>;
 
+interface Order {
+    id: string;
+    clientId: string;
+    deliveryDate: string;
+    totalPrice: number;
+    advancePayment: number;
+    paidSoFar: number;
+    notes: string | null;
+    items: any[];
+    payments: any[];
+    createdAt: string;
+}
+
 interface Client {
     id: string;
     name: string;
@@ -115,17 +128,17 @@ export default function EditOrderPage() {
                 if (furnitureData.success) setFurnitureTypes(furnitureData.data);
                 if (fabricData.success) setFabricTypes(fabricData.data);
 
-                // Check if this order has any payments linked (lock advance field)
-                const paymentsRes = await fetch(`/api/payments?pageSize=1&orderId=${params.id}`);
-                const paymentsData = await paymentsRes.json();
-                if (paymentsData.success) setHasPayments((paymentsData.total ?? paymentsData.data?.length ?? 0) > 0);
-
                 if (orderData.success) {
                     const order = orderData.data;
+
+                    // Set hasPayments based on the nested payments array from Order API
+                    setHasPayments((order.payments?.length || 0) > 0);
+
                     form.reset({
                         clientId: order.clientId,
                         deliveryDate: new Date(order.deliveryDate),
-                        advancePayment: parseFloat(order.advancePayment),
+                        // Use paidSoFar (Net) instead of the static advancePayment field
+                        advancePayment: order.paidSoFar || 0,
                         notes: order.notes || "",
                         items: order.items.map((item: any) => ({
                             furnitureTypeId: item.furnitureTypeId,
@@ -232,7 +245,7 @@ export default function EditOrderPage() {
     }
 
     return (
-        <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 page-enter">
+        <div className="flex-1 space-y-6 px-4 md:px-8 pt-6 pb-24 page-enter">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button
@@ -251,7 +264,7 @@ export default function EditOrderPage() {
             </div>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form id="edit-order-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormSection
                         title="Order Details"
                         description="Basic information for this order"
@@ -440,6 +453,7 @@ export default function EditOrderPage() {
                         onCancel={() => router.back()}
                         submitText="Update Order"
                         submitIcon={<Save className="h-4 w-4" />}
+                        formId="edit-order-form"
                     />
                 </form>
             </Form>

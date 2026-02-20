@@ -1,55 +1,36 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Loader2, Armchair, ImageIcon, Trash2, Layers, Palette } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { AIImageGenerator } from "@/components/stock/ai-image-generator";
+import { useState, useEffect, useMemo, Suspense } from "react";
+import { Plus, Armchair, ImageIcon, Trash2, Layers, Palette } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { DataTable, Column, RowAction, FilterConfig, TabsConfig, BulkAction } from "@/components/shared/data-table";
 import { StatsCard } from "@/components/dashboard/widgets/stats-card";
-import { FormInput } from "@/components/shared/form-input";
-import { Form } from "@/components/ui/form";
-
-const typeSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    description: z.string().optional(),
-    imageUrl: z.string().optional(),
-});
-
-type TypeFormValues = z.infer<typeof typeSchema>;
 
 interface TypeItem {
     id: string;
     name: string;
     description: string | null;
     imageUrl?: string | null;
+    _count?: {
+        stocks: number;
+        orderItems: number;
+    };
 }
 
-export default function TypesPage() {
+function TypesContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
     const [furnitureTypes, setFurnitureTypes] = useState<TypeItem[]>([]);
     const [fabricTypes, setFabricTypes] = useState<TypeItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [currentTab, setCurrentTab] = useState<"furniture" | "fabric">("furniture");
-    const [editingItem, setEditingItem] = useState<TypeItem | null>(null);
-    const [submitting, setSubmitting] = useState(false);
 
-    const form = useForm<TypeFormValues>({
-        resolver: zodResolver(typeSchema),
-        defaultValues: { name: "", description: "", imageUrl: "" },
-    });
+    const tabParam = searchParams.get("tab");
+    const initialTab = (tabParam === "furniture" || tabParam === "fabric") ? tabParam : "furniture";
+    const [currentTab, setCurrentTab] = useState<"furniture" | "fabric">(initialTab);
 
     useEffect(() => {
         fetchTypes();
@@ -75,46 +56,6 @@ export default function TypesPage() {
         }
     };
 
-    const openDialog = (type: "furniture" | "fabric", item?: TypeItem) => {
-        setCurrentTab(type);
-        setEditingItem(item || null);
-        form.reset({
-            name: item?.name || "",
-            description: item?.description || "",
-            imageUrl: item?.imageUrl || "",
-        });
-        setDialogOpen(true);
-    };
-
-    const onSubmit = async (data: TypeFormValues) => {
-        try {
-            setSubmitting(true);
-            const endpoint = currentTab === "furniture" ? "/api/furniture-types" : "/api/fabric-types";
-            const url = editingItem ? `${endpoint}/${editingItem.id}` : endpoint;
-            const method = editingItem ? "PUT" : "POST";
-            const response = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-            const result = await response.json();
-            if (result.success) {
-                toast({
-                    title: "Success",
-                    description: `${currentTab === "furniture" ? "Furniture" : "Fabric"} type ${editingItem ? "updated" : "created"} successfully`,
-                });
-                setDialogOpen(false);
-                fetchTypes();
-            } else {
-                toast({ title: "Error", description: result.error || "Failed to save type", variant: "destructive" });
-            }
-        } catch {
-            toast({ title: "Error", description: "Failed to save type", variant: "destructive" });
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
     const handleDelete = async (type: "furniture" | "fabric", id: string) => {
         const endpoint = type === "furniture" ? "/api/furniture-types" : "/api/fabric-types";
         const response = await fetch(`${endpoint}/${id}`, { method: "DELETE" });
@@ -134,30 +75,31 @@ export default function TypesPage() {
     ], [furnitureTypes, fabricTypes]);
 
     const tabCounts = {
-        all: allTypes.length,
         furniture: furnitureTypes.length,
         fabric: fabricTypes.length,
     };
 
     const columns: Column<TypeItem & { _type: string }>[] = [
-        {
+        ...(currentTab === "fabric" ? [{
             header: "Image",
-            render: (item) => item._type === "fabric" ? (
-                item.imageUrl ? (
-                    <div className="relative h-10 w-10 rounded-md overflow-hidden border border-white/10 shadow-sm">
-                        <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
-                    </div>
-                ) : (
-                    <div className="h-10 w-10 rounded-md bg-muted/20 flex items-center justify-center border border-dashed border-white/5">
-                        <ImageIcon className="h-4 w-4 text-muted-foreground opacity-30" />
-                    </div>
-                )
-            ) : (
-                <div className="h-10 w-10 rounded-md bg-muted/10 flex items-center justify-center border border-dashed border-white/5">
-                    <Armchair className="h-4 w-4 text-muted-foreground opacity-30" />
+            render: (item: TypeItem & { _type: string }) => item.imageUrl ? (
+                <div className="relative h-10 w-10 rounded-md overflow-hidden border border-white/10 shadow-sm">
+                    <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="object-cover w-full h-full"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="h-full w-full bg-muted/20 flex flex-col items-center justify-center border border-dashed border-white/5"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground opacity-30"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>';
+                        }}
+                    />
                 </div>
-            ),
-        },
+            ) : (
+                <div className="h-10 w-10 rounded-md bg-muted/20 flex items-center justify-center border border-dashed border-white/5">
+                    <ImageIcon className="h-4 w-4 text-muted-foreground opacity-30" />
+                </div>
+            )
+        }] as Column<TypeItem & { _type: string }>[] : []),
         {
             header: "Name",
             accessorKey: "name",
@@ -172,26 +114,45 @@ export default function TypesPage() {
         {
             header: "Category",
             render: (item) => (
-                <span className={cn(
-                    "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                <div className={cn(
+                    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border font-bold uppercase tracking-wider text-[10px] backdrop-blur-sm transition-all whitespace-nowrap",
                     item._type === "furniture"
-                        ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                        : "bg-purple-500/10 text-purple-500 border-purple-500/20"
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                        : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30"
                 )}>
+                    {item._type === "furniture" ? <Armchair className="h-3 w-3 shrink-0" /> : <Layers className="h-3 w-3 shrink-0" />}
                     {item._type}
-                </span>
+                </div>
             ),
+        },
+        {
+            header: "Usage",
+            render: (item) => {
+                const inventoryCount = item._count?.stocks || 0;
+                const ordersCount = item._count?.orderItems || 0;
+                return (
+                    <div className="flex gap-2">
+                        <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded border border-blue-500/20" title="Inventory">Inventory: {inventoryCount}</span>
+                        <span className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded border border-green-500/20" title="Orders">Orders: {ordersCount}</span>
+                    </div>
+                );
+            },
         },
     ];
 
     const tabsConfig: TabsConfig = {
         valueKey: "_type",
-        defaultValue: "all",
+        defaultValue: currentTab,
         items: [
-            { value: "all", label: "All Types", icon: Armchair },
             { value: "furniture", label: "Furniture", icon: Armchair },
             { value: "fabric", label: "Fabric", icon: ImageIcon },
         ],
+    };
+
+    const onFilterChange = (filters: any) => {
+        if (filters.tab && (filters.tab === "furniture" || filters.tab === "fabric")) {
+            setCurrentTab(filters.tab);
+        }
     };
 
     const filterConfig: FilterConfig = {
@@ -206,7 +167,9 @@ export default function TypesPage() {
         {
             type: "edit",
             label: "Edit Type",
-            onClick: (item) => openDialog(item._type as "furniture" | "fabric", item),
+            onClick: (item) => router.push(`/types/${item._type}/${item.id}/edit`),
+            disabled: (item) => (item._count?.stocks || 0) > 0 || (item._count?.orderItems || 0) > 0,
+            disabledReason: "Cannot edit an in-use type",
         },
         {
             type: "delete",
@@ -216,6 +179,8 @@ export default function TypesPage() {
                 description: (item) => `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
             },
             onClick: (item) => handleDelete(item._type as "furniture" | "fabric", item.id),
+            disabled: (item) => (item._count?.stocks || 0) > 0 || (item._count?.orderItems || 0) > 0,
+            disabledReason: "Cannot delete an in-use type",
         },
     ];
 
@@ -226,11 +191,19 @@ export default function TypesPage() {
             variant: "destructive",
             confirmation: {
                 title: "Delete Types",
-                description: "Delete the selected type categories? This cannot be undone.",
+                description: "Delete the selected type categories? (In-use types will be skipped). This cannot be undone.",
             },
             onClick: async (selectedItems) => {
                 try {
-                    await Promise.all(selectedItems.map(item => {
+                    const itemsToDelete = selectedItems.filter(item => (item._count?.stocks || 0) === 0 && (item._count?.orderItems || 0) === 0);
+                    if (itemsToDelete.length === 0) {
+                        toast({ title: "Info", description: "No deletable items selected (all are in use)." });
+                        return;
+                    }
+                    if (itemsToDelete.length < selectedItems.length) {
+                        toast({ title: "Info", description: `Skipping ${selectedItems.length - itemsToDelete.length} in-use items.` });
+                    }
+                    await Promise.all(itemsToDelete.map(item => {
                         const endpoint = item._type === "furniture" ? "/api/furniture-types" : "/api/fabric-types";
                         return fetch(`${endpoint}/${item.id}`, { method: "DELETE" });
                     }));
@@ -249,12 +222,12 @@ export default function TypesPage() {
                 description="Manage furniture and fabric categories for orders and inventory"
                 headerActions={
                     <Button
-                        onClick={() => openDialog(currentTab)}
+                        onClick={() => router.push(`/types/${currentTab}/new`)}
                         className="shadow-lg shadow-secondary/20 hover:scale-105 transition-all"
                         variant="secondary"
                     >
                         <Plus className="h-4 w-4" />
-                        Add Type
+                        Add {currentTab === "furniture" ? "Furniture" : "Fabric"} Type
                     </Button>
                 }
                 sectionTitle="Type Categories"
@@ -272,6 +245,7 @@ export default function TypesPage() {
                 rowIdKey="id"
                 tabsConfig={tabsConfig}
                 tabCounts={tabCounts}
+                onFilterChange={onFilterChange}
                 filterConfig={filterConfig}
                 rowActions={rowActions}
                 bulkActions={bulkActions}
@@ -279,92 +253,14 @@ export default function TypesPage() {
                 emptyDescription="Add furniture or fabric categories to get started"
                 emptyIcon={<Armchair className="h-16 w-16 text-muted-foreground/20" />}
             />
-
-            {/* Add/Edit Dialog */}
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className={cn(
-                    "glass-card border-none transition-all duration-300 overflow-hidden",
-                    currentTab === "furniture" ? "max-w-md" : "max-w-4xl"
-                )}>
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold font-heading uppercase tracking-wide">
-                            {editingItem ? "Edit" : "Add"} {currentTab === "furniture" ? "Furniture" : "Fabric"} Type
-                        </DialogTitle>
-                        <DialogDescription>
-                            Enter the details for this {currentTab} category below
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
-                            <div className={cn(
-                                "grid gap-6",
-                                currentTab === "fabric" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
-                            )}>
-                                <div className="space-y-5">
-                                    <FormInput
-                                        control={form.control}
-                                        name="name"
-                                        label="Category Name *"
-                                        placeholder={currentTab === "furniture" ? "e.g., Sofa, Bed" : "e.g., Velvet, Leather"}
-                                        className="h-11"
-                                    />
-                                    <FormInput
-                                        control={form.control}
-                                        name="description"
-                                        label="Description"
-                                        placeholder="Optional description..."
-                                        type="textarea"
-                                        className="min-h-[150px]"
-                                    />
-                                </div>
-
-                                {currentTab === "fabric" && (
-                                    <div className="space-y-4 pt-1 animate-in fade-in slide-in-from-right-4 duration-500">
-                                        <div className="p-4 rounded-lg bg-black/20 border border-white/5 space-y-4">
-                                            <p className="text-xs font-bold uppercase tracking-widest text-primary">Fabric Visuals</p>
-                                            <AIImageGenerator
-                                                entityId={editingItem?.id}
-                                                entityType="FABRIC"
-                                                initialPrompt={form.watch("name")}
-                                                onImageGenerated={(url) => form.setValue("imageUrl", url)}
-                                            />
-                                            {form.watch("imageUrl") && (
-                                                <div className="space-y-2">
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Current Selection</p>
-                                                    <div className="relative aspect-video rounded-sm overflow-hidden border border-white/10 shadow-inner group">
-                                                        <img src={form.watch("imageUrl")} className="object-cover w-full h-full" alt="Preview" />
-                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                            <Button
-                                                                type="button"
-                                                                variant="destructive"
-                                                                size="sm"
-                                                                onClick={() => form.setValue("imageUrl", "")}
-                                                                className="h-8"
-                                                            >
-                                                                Remove
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
-                                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="border-white/10 hover:bg-white/5">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={submitting} className="min-w-[120px] shadow-lg shadow-primary/20">
-                                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (editingItem ? "Update Type" : "Create Type")}
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
         </div>
+    );
+}
+
+export default function TypesPage() {
+    return (
+        <Suspense fallback={<div className="flex-1 flex items-center justify-center p-8 text-muted-foreground">Loading...</div>}>
+            <TypesContent />
+        </Suspense>
     );
 }

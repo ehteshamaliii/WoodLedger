@@ -25,6 +25,11 @@ export async function GET() {
 
         const furnitureTypes = await prisma.furnitureType.findMany({
             orderBy: { name: "asc" },
+            include: {
+                _count: {
+                    select: { stocks: true, orderItems: true }
+                }
+            }
         });
 
         return NextResponse.json({

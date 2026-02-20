@@ -18,7 +18,10 @@ import {
     Phone,
     MapPin,
     Building2,
-    FileText
+    FileText,
+    ArrowUpRight,
+    ArrowDownLeft,
+    Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +41,15 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PremiumCard } from "@/components/shared/premium-card";
 import { DetailItem } from "@/components/shared/detail-item";
+
+interface OrderPayment {
+    id: string;
+    amount: number;
+    type: "CREDIT" | "DEBIT";
+    date: string;
+    description: string | null;
+    accountName: string;
+}
 
 interface OrderItem {
     id: string;
@@ -61,8 +73,11 @@ interface Order {
     status: string;
     totalPrice: number;
     advancePayment: number;
+    paidSoFar: number;
+    balance: number;
     notes: string | null;
     items: OrderItem[];
+    payments: OrderPayment[];
     createdAt: string;
 }
 
@@ -256,6 +271,74 @@ export default function OrderDetailsPage() {
                             </TableBody>
                         </Table>
                     </div>
+
+                    {/* Payment History Section */}
+                    {order.payments && order.payments.length > 0 && (
+                        <div className="mt-8 glass-card flex flex-col overflow-hidden border no-print shadow-black/5">
+                            <div className="p-6 border-b border-white/5 bg-muted/10">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-sm bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                                        <Wallet className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold font-heading uppercase tracking-widest bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment History</h3>
+                                        <p className="text-sm text-muted-foreground font-medium opacity-70 italic">Historical record of all credits and debits</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-0">
+                                <Table>
+                                    <TableHeader className="bg-muted/5">
+                                        <TableRow className="hover:bg-transparent border-white/5">
+                                            <TableHead className="font-heading uppercase text-[10px] font-black tracking-widest text-muted-foreground/60 pl-8">Date</TableHead>
+                                            <TableHead className="font-heading uppercase text-[10px] font-black tracking-widest text-muted-foreground/60">Account</TableHead>
+                                            <TableHead className="font-heading uppercase text-[10px] font-black tracking-widest text-muted-foreground/60">Type</TableHead>
+                                            <TableHead className="font-heading uppercase text-[10px] font-black tracking-widest text-muted-foreground/60 text-right pr-8">Amount</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {order.payments.map((payment) => (
+                                            <TableRow
+                                                key={payment.id}
+                                                className="hover:bg-primary/[0.02] border-white/5 transition-all cursor-pointer group"
+                                                onClick={() => router.push(`/payments/${payment.id}/view`)}
+                                            >
+                                                <TableCell className="pl-8 py-4">
+                                                    <div className="text-sm font-medium text-muted-foreground">{format(new Date(payment.date), "MMM dd, yyyy")}</div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="font-bold text-foreground group-hover:text-primary transition-colors">{payment.accountName}</div>
+                                                    {payment.description && <div className="text-[10px] text-muted-foreground italic truncate max-w-[200px]">{payment.description}</div>}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={cn(
+                                                            "font-bold uppercase tracking-wider text-[10px] px-2 py-0",
+                                                            payment.type === "CREDIT"
+                                                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-emerald-500/30"
+                                                                : "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30"
+                                                        )}
+                                                    >
+                                                        {payment.type === "CREDIT" ? (
+                                                            <span className="flex items-center gap-1"><ArrowUpRight className="h-3 w-3" /> Credit</span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-1"><ArrowDownLeft className="h-3 w-3" /> Debit</span>
+                                                        )}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right pr-8 font-black font-heading tabular-nums">
+                                                    <span className={payment.type === "CREDIT" ? "text-emerald-500" : "text-red-500"}>
+                                                        {payment.type === "CREDIT" ? "+" : "−"} Rs. {payment.amount.toLocaleString()}
+                                                    </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Sidebar - Details */}
@@ -340,17 +423,20 @@ export default function OrderDetailsPage() {
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center bg-green-500/[0.03] p-3 rounded-sm border border-green-500/10 print:bg-transparent print:border-none print:p-0">
-                                    <span className="text-[10px] font-black text-green-500 uppercase tracking-[0.2em] print:text-gray-600">Advance Paid</span>
+                                    <span className="text-[10px] font-black text-green-500 uppercase tracking-[0.2em] print:text-gray-600">Total Paid (Net)</span>
                                     <span className="text-green-500 font-black font-heading text-base">
-                                        - Rs. {order.advancePayment.toLocaleString()}
+                                        - Rs. {order.paidSoFar.toLocaleString()}
                                     </span>
                                 </div>
                                 <Separator className="bg-white/5 print:bg-black" />
                                 <div className="flex flex-col gap-1.5 pt-2">
                                     <div className="flex justify-between items-end text-foreground print:text-black">
                                         <span className="text-xs font-black font-heading uppercase tracking-[0.3em] opacity-40">Outstanding Balance</span>
-                                        <span className="text-3xl font-black font-heading text-accent print:text-black">
-                                            Rs. {(order.totalPrice - order.advancePayment).toLocaleString()}
+                                        <span className={cn(
+                                            "text-3xl font-black font-heading print:text-black",
+                                            order.balance > 0 ? "text-accent" : "text-emerald-500"
+                                        )}>
+                                            Rs. {order.balance.toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

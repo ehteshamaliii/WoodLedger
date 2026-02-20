@@ -44,10 +44,12 @@ export function OrderStatusDistributionWidget({ data = [] }: OrderStatusDistribu
     }
 
     const STATUS_COLORS: Record<string, string> = {
-        'Pending': 'hsl(38, 92%, 60%)',        // Brighter Amber
-        'In Production': 'hsl(217, 91%, 70%)',  // Brighter Blue
-        'Ready': 'hsl(142, 71%, 55%)',          // Brighter Emerald
-        'Delivered': 'hsl(215, 25%, 65%)',      // Brighter Slate
+        'Pending': 'hsl(38, 92%, 50%)',        // Amber
+        'Confirmed': 'hsl(217, 91%, 60%)',      // Blue
+        'In Production': 'hsl(271, 81%, 56%)',  // Purple
+        'Ready': 'hsl(142, 71%, 45%)',          // Emerald
+        'Delivered': 'hsl(215, 16%, 47%)',      // Zinc/Slate 
+        'Cancelled': 'hsl(0, 84%, 60%)',        // Red
     };
 
     const renderActiveShape = (props: any) => {

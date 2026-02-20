@@ -9,8 +9,14 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function ThemeToggle() {
     const { setTheme, theme } = useTheme();
@@ -42,6 +48,7 @@ export function ThemeToggle() {
     );
 }
 
+
 export function ThemeToggleSimple() {
     const { setTheme, theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = React.useState(false);
@@ -63,13 +70,18 @@ export function ThemeToggleSimple() {
     };
 
     return (
-        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggleTheme}>
-            {resolvedTheme === "dark" ? (
-                <Sun className="h-4 w-4 transition-transform hover:rotate-45" />
-            ) : (
-                <Moon className="h-4 w-4 transition-transform hover:-rotate-12" />
-            )}
-            <span className="sr-only">Toggle theme</span>
-        </Button>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 hover-scale" onClick={toggleTheme}>
+                    {resolvedTheme === "dark" ? (
+                        <Sun className="h-4 w-4 transition-transform hover:rotate-45" />
+                    ) : (
+                        <Moon className="h-4 w-4 transition-transform hover:-rotate-12" />
+                    )}
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent>Toggle Theme</TooltipContent>
+        </Tooltip>
     );
 }

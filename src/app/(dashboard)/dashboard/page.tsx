@@ -151,15 +151,15 @@ export default function DashboardPage() {
                     {!isEditing ? (
                         <div className="flex gap-3 animate-in fade-in slide-in-from-right-4 duration-500">
                             {isSales && (
-                                <Link href="/orders/create">
-                                    <Button variant="secondary" size="lg" className="h-11 px-6 rounded-sm font-bold shadow-lg shadow-secondary/10 hover-scale group">
+                                <Link href="/orders/new">
+                                    <Button variant="secondary" size="lg" className="h-11 px-6 rounded-sm font-bold shadow-lg shadow-secondary/20 hover-scale group">
                                         <Plus className="h-5 w-5 bg-secondary-foreground/10 rounded-md p-0.5 group-hover:rotate-90 transition-transform" />
                                         New Order
                                     </Button>
                                 </Link>
                             )}
                             {isInventory && (
-                                <Link href="/inventory">
+                                <Link href="/inventory/new">
                                     <Button size="lg" variant="outline" className="h-11 px-6 rounded-sm font-bold bg-background/50 backdrop-blur shadow-sm hover-scale">
                                         <Package className="h-5 w-5 opacity-60" />
                                         Add Stock

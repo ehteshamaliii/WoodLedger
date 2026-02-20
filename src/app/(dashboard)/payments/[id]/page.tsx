@@ -197,7 +197,7 @@ export default function PaymentFormPage() {
     }
 
     return (
-        <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 pb-24 page-enter">
+        <div className="flex-1 space-y-6 px-4 md:px-8 pt-6 pb-24 page-enter">
             {/* Header */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/40 pb-6 mb-8">
                 <div className="flex items-center gap-4">
@@ -217,7 +217,7 @@ export default function PaymentFormPage() {
             </div>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form id="payment-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <div className="grid gap-6 lg:grid-cols-3">
                         {/* Left column — main form */}
                         <div className="lg:col-span-2 space-y-6">
@@ -451,6 +451,7 @@ export default function PaymentFormPage() {
                         onCancel={() => router.back()}
                         submitText={isEdit ? "Update Payment" : "Record Payment"}
                         submitIcon={isEdit ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                        formId="payment-form"
                     />
                 </form>
             </Form>
