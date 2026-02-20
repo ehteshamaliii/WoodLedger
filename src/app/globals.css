@@ -1,26 +1,234 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-montserrat);
+  --font-heading: var(--font-space-grotesk);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* 
+  WoodLedger Brand Colors:
+  Primary: #B08F4F (Warm Gold / Wood tone)
+  Secondary: #4F70B0 (Steel Blue)
+*/
+
+:root {
+  --radius: 0.5rem;
+
+  /* Ivory Mist Palette - Exact HEX Mapping */
+  --background: #FFF8F0;
+  --foreground: #2D241E;
+  /* Deep coffee for readability on ivory */
+
+  --card: #FFFAF5;
+  /* Slightly lighter ivory for depth */
+  --card-foreground: #2D241E;
+
+  --popover: #FFFAF5;
+  --popover-foreground: #2D241E;
+
+  /* Golden Nectar (#F4D06F) */
+  --primary: #F4D06F;
+  --primary-foreground: #43321B;
+  /* High contrast dark brown */
+
+  /* Ocean Breeze (#9DD9D2) */
+  --secondary: #9DD9D2;
+  --secondary-foreground: #1E3A37;
+  /* Dark teal for contrast */
+
+  /* Sunset Ember (#FF8811) */
+  --accent: #FF8811;
+  --accent-foreground: #FFFFFF;
+
+  --muted: #F2EBE1;
+  /* Warm muted taupe */
+  --muted-foreground: #7D6B5A;
+
+  --destructive: #E63946;
+
+  --border: #E8DCC4;
+  --input: #E8DCC4;
+  --ring: #F4D06F;
+
+  /* Glassmorphism light - Tinted with Ivory */
+  --glass-bg: rgba(255, 248, 240, 0.7);
+  --glass-border: rgba(244, 208, 111, 0.3);
+}
+
+.dark {
+  /* Dark Theme - Warm brand-consistent dark palette */
+  --background: #1A1814;
+  /* Deep obsidian charcoal */
+  --foreground: #FFF8F0;
+
+  --card: #24211B;
+  --card-foreground: #FFF8F0;
+
+  --popover: #24211B;
+  --popover-foreground: #FFF8F0;
+
+  --primary: #F4D06F;
+  --primary-foreground: #1A1814;
+
+  --secondary: #7CB9B2;
+  /* Slightly deeper ocean breeze for dark mode */
+  --secondary-foreground: #1A1814;
+
+  --accent: #FF8811;
+  --accent-foreground: #1A1814;
+
+  --muted: #2D2821;
+  --muted-foreground: #A1917C;
+
+  --destructive: #E63946;
+
+  --border: #3A3329;
+  --input: #3A3329;
+  --ring: #F4D06F;
+
+  /* Glassmorphism dark */
+  --glass-bg: rgba(26, 24, 20, 0.7);
+  --glass-border: rgba(244, 208, 111, 0.2);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50 transition-colors duration-200;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-montserrat), sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-space-grotesk), sans-serif;
+    @apply tracking-tight;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--muted);
+    border-radius: 10px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+
+  /* Glassmorphism utility */
+  .glass {
+    backdrop-filter: blur(20px);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  button,
+  a,
+  div[data-slot="command"] {
+    cursor: pointer;
+  }
+
+  .glass-card {
+    backdrop-filter: blur(20px);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    @apply rounded-sm transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px];
+  }
+
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px -5px oklch(from var(--primary) l c h / 0.5);
+  }
+
+  .glow-secondary {
+    box-shadow: 0 0 20px -5px oklch(from var(--secondary) l c h / 0.5);
+  }
+}
+
+/* Page transition animations */
+@layer utilities {
+  .page-enter {
+    animation: fade-up 0.4s ease-out forwards;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
+  }
 }

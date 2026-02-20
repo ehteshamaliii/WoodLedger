@@ -1,0 +1,67 @@
+{
+    "name": "WoodLedger",
+    "short_name": "WoodLedger",
+    "description": "Furniture Business Dashboard - Manage orders, inventory, payments, and more",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#4F70B0",
+    "theme_color": "#B08F4F",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "categories": [
+        "business",
+        "productivity"
+    ],
+    "screenshots": [],
+    "shortcuts": [
+        {
+            "name": "New Order",
+            "short_name": "New Order",
+            "description": "Create a new order",
+            "url": "/orders/new",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "View Inventory",
+            "short_name": "Inventory",
+            "description": "Check current stock",
+            "url": "/inventory",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}

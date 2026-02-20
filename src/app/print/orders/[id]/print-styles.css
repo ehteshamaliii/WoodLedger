@@ -1,0 +1,20 @@
+@media print {
+    @page {
+        margin: 0;
+        size: A4 portrait;
+    }
+
+    body {
+        margin: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print-container {
+        width: 100%;
+        max-width: 210mm;
+        /* A4 width */
+        margin: 0 auto;
+        padding: 10mm;
+    }
+}
