@@ -190,7 +190,7 @@ npx prisma db seed
 ---
 
 ## 👨‍💻 Owner
-**Design & Developed by [Ehtesham Ali](https://github.com/koool)**
+**Design & Developed by [Ehtesham Ali](https://github.com/ehteshamaliii)**
 
 ---
 
@@ -204,7 +204,7 @@ Ensure Node.js 18+ and MySQL 8+ are installed.
 ### 2. Deployment Steps
 ```bash
 # Clone and install dependencies
-git clone https://github.com/your-org/woodledger.git
+git clone https://github.com/ehteshamaliii/WoodLedger.git
 cd woodledger
 npm install --production=false
 
@@ -231,4 +231,4 @@ pm2 start npm --name "woodledger" -- start
 
 ## 📝 License
 
-Private — All rights reserved.
+MIT License — See [LICENSE](file:///f:/Sites/woodledger/LICENSE) for details.

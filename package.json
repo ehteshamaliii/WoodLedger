@@ -1,7 +1,13 @@
 {
   "name": "woodledger",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "license": "MIT",
+  "author": "Ehtesham Ali <https://github.com/ehteshamaliii>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ehteshamaliii/WoodLedger.git"
+  },
   "scripts": {
     "dev": "npx tsx server/socket.ts",
     "build": "next build",
